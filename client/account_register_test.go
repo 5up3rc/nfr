@@ -38,3 +38,24 @@ func TestAccountRegisterFail(t *testing.T) {
 		t.Fatal("expected error")
 	}
 }
+
+func TestAccountRegisterInvalidArguments(t *testing.T) {
+	var (
+		c                      = New("https://127.0.0.1", "test-key")
+		accountRegisterRequest = &AccountRegisterRequest{}
+	)
+
+	if err := c.AccountRegister(accountRegisterRequest); err == nil {
+		t.Fatal("expected error")
+	}
+
+	accountRegisterRequest.Details.Name = "test-name"
+	if err := c.AccountRegister(accountRegisterRequest); err == nil {
+		t.Fatal("expected error")
+	}
+
+	accountRegisterRequest.Details.Email = "test-email_alphasoc.com"
+	if err := c.AccountRegister(accountRegisterRequest); err == nil {
+		t.Fatal("expected error")
+	}
+}

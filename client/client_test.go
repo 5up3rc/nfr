@@ -6,19 +6,24 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"strings"
 	"testing"
+	"time"
 )
 
-// noop server and handler for testing
+// some servers definitions for diffrent kind of tests
 var (
-	noopServer  *httptest.Server
 	noopHandler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {})
+	noopServer  = httptest.NewServer(noopHandler)
 
 	internalServerErrorHandler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(&ErrorResponse{"no key"})
 	})
-	internalServerErrorServer *httptest.Server
+	internalServerErrorServer = httptest.NewServer(internalServerErrorHandler)
+
+	timeoutHandler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { time.Sleep(1 * time.Second) })
+	timeoutServer  = httptest.NewServer(timeoutHandler)
 )
 
 func checkMethodAndPath(t *testing.T, r *http.Request, method string, path string) {
@@ -33,9 +38,6 @@ func checkMethodAndPath(t *testing.T, r *http.Request, method string, path strin
 }
 
 func TestMain(m *testing.M) {
-	noopServer = httptest.NewServer(noopHandler)
-	internalServerErrorServer = httptest.NewServer(internalServerErrorHandler)
-
 	defer noopServer.Close()
 	defer internalServerErrorServer.Close()
 	os.Exit(m.Run())
@@ -109,20 +111,30 @@ func TestResponseErrorMessage(t *testing.T) {
 	}
 }
 
-func TestDoInvalidMethod(t *testing.T) {
-	if _, err := New("", "").do(context.Background(), "/", "/", nil, nil, nil); err == nil {
-		t.Fatal("exptected invalid method error")
-	}
-}
-
 func TestPostMarshalError(t *testing.T) {
 	if _, err := New(noopServer.URL, "").post(context.Background(), "/", nil, func() {}); err == nil {
 		t.Fatal("exptected json marshal error")
 	}
 }
 
+func TestDoInvalidMethod(t *testing.T) {
+	if _, err := New("", "").do(context.Background(), "/", "/", nil, nil, nil); err == nil {
+		t.Fatal("exptected invalid method error")
+	}
+}
+
 func TestDoInvalidRequest(t *testing.T) {
 	if _, err := New("", "").do(context.Background(), "noop", "/", nil, nil, nil); err == nil {
 		t.Fatal("exptected invalid method error")
+	}
+}
+
+func TestDoTimeoutRequest(t *testing.T) {
+	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Millisecond)
+	defer cancel()
+	if _, err := New(timeoutServer.URL, "").do(ctx, "get", "/", nil, nil, nil); err == nil {
+		t.Fatal("exptected i/o timeout error")
+	} else if err != nil && !strings.Contains(err.Error(), "i/o timeout") {
+		t.Fatalf("exptected i/o timeout error, but got %s", err)
 	}
 }
