@@ -38,7 +38,7 @@ packetLoop:
 	return add, b.len()
 }
 
-// Packets returns slice of packets.
+// Packets returns slice of packets and reset buffer.
 func (b *PacketBuffer) Packets() []*Packet {
 	packets := b.packets[:]
 	b.reset()
