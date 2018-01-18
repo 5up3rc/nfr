@@ -1,5 +1,5 @@
 # Network Flight Recorder
-**NFR** is a lightweight Linux client used to submit DNS events to _api.alphasoc.net_ for processing and retrieve alerts. The AlphaSOC DNS Analytics Engine quickly identifies security threats within DNS material (e.g. C2 traffic, DNS tunneling, ransomware, and policy violations such as cryptocurrency mining and third-party VPN use). NFR can be run as a sniffer, or can read pcap, bro and Suricata logs from disk.
+**NFR** is a lightweight Linux client used to submit network events to _api.alphasoc.net_ for processing and retrieve alerts. The AlphaSOC Analytics Engine quickly identifies security threats within DNS and IP material (e.g. C2 traffic, Tor traffic, DNS tunneling, ransomware, and policy violations such as cryptocurrency mining and third-party VPN use). NFR can be run as a sniffer, or can read content from disk in log formats including PCAP, Bro, and Suricata.
 
 Alert data is returned in JSON format upon processing, describing the threats and policy violations.
 
@@ -27,9 +27,9 @@ Use the following command to install NFR:
 Upon installation, test NFR as follows:
 ```
 # nfr --help
-Network Flight Recorder (NFR) is an application which captures DNS requests and
-provides deep analysis and alerting of suspicious events, identifying gaps in
-your security controls and highlighting targeted attacks and policy violations.
+Network Flight Recorder (NFR) is an application which captures network traffic
+and provides deep analysis and alerting of suspicious events, identifying gaps
+in your security controls and highlighting targeted attacks and policy violations.
 
 Usage:
   nfr [command] [argument]
@@ -38,8 +38,8 @@ Available Commands:
   account register       Generate an API key via the licensing server
   account reset [email]  Reset the API key associated with a given email address
   account status         Show the status of your AlphaSOC API key and license
-  listen                 Start the sniffer and score live DNS events
-  read [file]            Process DNS events stored on disk in known formats
+  listen                 Start the sniffer and score live network events
+  read [file]            Process events stored on disk in known formats
   version                Show the NFR binary version
   help                   Provides help and usage instructions
 
@@ -67,7 +67,7 @@ Next, check your email and click the verification link to activate your API key.
 ```
 
 ## Monitoring scope
-Use directives within `/etc/nfr/scope.yml` to define the monitoring scope. You can find an example [`scope.yml`](https://github.com/alphasoc/nfr/blob/master/scope.yml) file in the repository's root directory. DNS requests from the IP ranges within scope will be processed by the AlphaSOC DNS Analytics API, and domains that are whitelisted (e.g. internal trusted domains) will be ignored. Adjust `scope.yml` to define the networks and systems that you wish to monitor, and the events to discard, e.g.
+Use directives within `/etc/nfr/scope.yml` to define the monitoring scope. You can find an example [`scope.yml`](https://github.com/alphasoc/nfr/blob/master/scope.yml) file in the repository's root directory. DNS requests from the IP ranges within scope will be processed by the AlphaSOC Analytics Engine, and domains that are whitelisted (e.g. internal trusted domains) will be ignored. Adjust `scope.yml` to define the networks and systems that you wish to monitor, and the events to discard, e.g.
 
 ```
 groups:
